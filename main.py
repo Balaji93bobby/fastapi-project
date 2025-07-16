@@ -61,13 +61,19 @@ def create_posts(new_post: Post) -> dict:
 def get_post(id: int) -> dict:
     post = find_post(id)
     if not post:
-        # response.status_code = status.HTTP_404_NOT_FOUND
-        # return {
-        #     'message': f'the post with id: {id} not found'
-        # }
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'the post with id: {id} is not found')
     return{
         'post_detail': f'this is the post of the {post}'
     }
 
+@app.delete('/post/{id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(id: int):
+    post = find_post(id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'the post with id: {id} is not found'
+                        )
+    else:
+        my_posts.remove(post)
+        
