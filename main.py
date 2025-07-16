@@ -1,6 +1,6 @@
-from struct import pack
-from typing import Optional
-from fastapi import Body, FastAPI
+from random import randrange
+from typing import Optional, List
+from fastapi import Body, FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
 
 
@@ -8,22 +8,66 @@ app = FastAPI()
 
 
 class Post(BaseModel):
+    id: int
     title: str
     content: str
     published: bool = True
     rating: Optional[int] = None
 
+my_posts = [
+        {
+            'title': 'top beaches in chenn',
+            'id': 1, 
+            'content': 'Checkout these awesome beaches', 
+            'published': True, 
+            'rating': 5
+        }, 
+        {
+            'title': 'top beaches in chennai', 
+            'id': 2, 
+            'content': 'Checkout these awesome beaches', 
+            'published': True, 
+            'rating': 5
+        }
+    ]
+
+
+def find_post(id):
+    for post in my_posts:
+        if post['id'] == id:
+            return post
 
 @app.get('/')
 def hello() -> dict:
-    return {"message" : "Hello World!"}
+    return {
+        "message" : "Hello World!"
+    }
 
 @app.get('/posts')
-def post() -> dict:
-    return {'data': 'this is the post'}
+def get_posts() -> List[dict]:
+    return my_posts
 
-@app.post('/createposts')
+@app.post('/posts', status_code=status.HTTP_201_CREATED)
 def create_posts(new_post: Post) -> dict:
-    print(new_post)
-    return {'message': 'post created successfully', "post": new_post}
+    post_dict = new_post.model_dump()
+    post_dict['id'] = randrange(0,100000)
+    my_posts.append(post_dict)
+    return {
+        'message': 'post created successfully', 
+        "all_posts": my_posts
+    }
+
+@app.get('/post/{id}')
+def get_post(id: int) -> dict:
+    post = find_post(id)
+    if not post:
+        # response.status_code = status.HTTP_404_NOT_FOUND
+        # return {
+        #     'message': f'the post with id: {id} not found'
+        # }
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'the post with id: {id} is not found')
+    return{
+        'post_detail': f'this is the post of the {post}'
+    }
 
