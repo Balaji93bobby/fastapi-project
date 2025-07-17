@@ -1,4 +1,5 @@
 from random import randrange
+from turtle import pos
 from typing import Optional, List
 from fastapi import Body, FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
@@ -36,6 +37,11 @@ def find_post(id):
     for post in my_posts:
         if post['id'] == id:
             return post
+        
+def find_index_post(id):
+    for i, p in enumerate(my_posts):
+        if p['id'] == id:
+            return i
 
 @app.get('/')
 def hello() -> dict:
@@ -76,4 +82,19 @@ def delete_post(id: int):
                         )
     else:
         my_posts.remove(post)
-        
+
+
+@app.put('/post/{id}', status_code=status.HTTP_202_ACCEPTED)
+def update_post(id: int, post: Post) -> dict:
+        index = find_index_post(id)
+        if index == None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f'psot with id : {id} not does not exist'
+                )
+        post_dict = post.model_dump()
+        post_dict['id']  = id  
+        my_posts[index] = post_dict
+        return{
+            'update_status': f"The post with id: {id} is updated with {post}"
+        }
