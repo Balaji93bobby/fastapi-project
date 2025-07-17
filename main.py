@@ -54,7 +54,7 @@ def get_posts() -> List[dict]:
     return my_posts
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
-def create_posts(new_post: Post) -> dict:
+def create_post(new_post: Post) -> dict:
     post_dict = new_post.model_dump()
     post_dict['id'] = randrange(0,100000)
     my_posts.append(post_dict)
