@@ -3,17 +3,33 @@ from turtle import pos
 from typing import Optional, List
 from fastapi import Body, FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
-
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import time
 
 app = FastAPI()
 
 
 class Post(BaseModel):
-    id: int
     title: str
     content: str
     published: bool = True
-    rating: Optional[int] = None
+
+while True:
+    try:
+        conn = psycopg2.connect(
+            host='localhost', 
+            database='fastapi', 
+            user='balaji', 
+            password='balaji',
+            cursor_factory=RealDictCursor
+        )
+        cursor=conn.cursor()
+        print('database connection successfull')
+        break
+    except Exception as error:
+        print(f'database conenction error: {error}')
+        time.sleep(2)
 
 my_posts = [
         {
@@ -50,8 +66,10 @@ def hello() -> dict:
     }
 
 @app.get('/posts')
-def get_posts() -> List[dict]:
-    return my_posts
+def get_posts() -> dict:
+    cursor.execute("""SELECT * FROM posts """)
+    posts = cursor.fetchall()
+    return {"data": posts}
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
 def create_post(new_post: Post) -> dict:
