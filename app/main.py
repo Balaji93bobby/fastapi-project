@@ -84,8 +84,9 @@ def create_post(new_post: Post) -> dict:
     }
 
 @app.get('/post/{id}')
-def get_post(id: int) -> dict:
-    post = find_post(id)
+def get_post(id) -> dict:
+    cursor.execute(""" SELECT * FROM posts WHERE id = (%s) """, (id))
+    post = cursor.fetchone()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'the post with id: {id} is not found')
