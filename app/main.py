@@ -73,12 +73,14 @@ def get_posts() -> dict:
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
 def create_post(new_post: Post) -> dict:
-    post_dict = new_post.model_dump()
-    post_dict['id'] = randrange(0,100000)
-    my_posts.append(post_dict)
+    cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s)  RETURNING * """, 
+                    (new_post.title, new_post.content, new_post.published)
+            )
+    created_post = cursor.fetchone()
+    conn.commit()
     return {
         'message': 'post created successfully', 
-        "all_posts": my_posts
+        "all_posts": created_post
     }
 
 @app.get('/post/{id}')
