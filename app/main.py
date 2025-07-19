@@ -2,6 +2,7 @@ from random import randrange
 from turtle import pos
 from typing import Optional, List
 from fastapi import Body, FastAPI, Response, status, HTTPException
+from httpx import post
 from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -96,13 +97,14 @@ def get_post(id) -> dict:
 
 @app.delete('/post/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
-    post = find_post(id)
-    if not post:
+    cursor.execute(""" DELETE FROM posts WHERE id = (%s) RETURNING *""", str((id)))
+    post = cursor.fetchone()
+    conn.commit()
+    if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'the post with id: {id} is not found'
                         )
-    else:
-        my_posts.remove(post)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.put('/post/{id}', status_code=status.HTTP_202_ACCEPTED)
