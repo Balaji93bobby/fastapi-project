@@ -74,9 +74,9 @@ def get_posts() -> dict:
     return {"data": posts}
 
 @app.get('/sql')
-async def test(db: Session = Depends(get_db)) -> dict:
-    db.query()
-    return{'message': 'db connected successfully'}
+async def test(db: Session = Depends(get_db)):
+    posts = db.query(models.Post).all()
+    return {'data': posts}
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
 def create_post(new_post: Post) -> dict:
