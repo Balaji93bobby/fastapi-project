@@ -1,15 +1,16 @@
 from random import randrange
-from turtle import pos
-from typing import Optional, List
-from fastapi import Body, FastAPI, Response, status, HTTPException
-from httpx import post
+from fastapi import Body, FastAPI, Response, status, HTTPException, Depends
 from pydantic import BaseModel
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
+from . import models
+from .database import get_db, engine
+from sqlalchemy.orm import Session
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
 
 class Post(BaseModel):
     title: str
@@ -71,6 +72,10 @@ def get_posts() -> dict:
     cursor.execute("""SELECT * FROM posts """)
     posts = cursor.fetchall()
     return {"data": posts}
+
+@app.get('/sql')
+async def test(db: Session = Depends(get_db)) -> dict:
+    return{'message': 'db connected successfully'}
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
 def create_post(new_post: Post) -> dict:
