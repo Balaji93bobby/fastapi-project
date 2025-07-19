@@ -75,6 +75,7 @@ def get_posts() -> dict:
 
 @app.get('/sql')
 async def test(db: Session = Depends(get_db)) -> dict:
+    db.query()
     return{'message': 'db connected successfully'}
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
