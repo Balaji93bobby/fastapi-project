@@ -1,6 +1,6 @@
 from datetime import datetime
 from click import DateTime
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 class Post(BaseModel):
     title: str
@@ -23,6 +23,22 @@ class ResponsePost(Post):
         orm_mode = True
 
 class AllPosts(Post):
+    pass
+    class Config:
+        orm_mode = True
+
+class User(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class CreateUser(User):
+    pass
+
+class UserDetail(BaseModel):
+    id: int
+    email: str
+    created_at: datetime
     pass
     class Config:
         orm_mode = True

@@ -1,9 +1,10 @@
 from ast import Dict
+from pyexpat import model
 from random import randrange
 from fastapi import Body, FastAPI, Response, status, HTTPException, Depends
 import time
 from . import models
-from .schemas import AllPosts, Post, CreatePost, UpdatePost, ResponsePost
+from .schemas import AllPosts, CreateUser, Post, CreatePost, UpdatePost, ResponsePost, User, UserDetail
 from .database import get_db, engine
 from sqlalchemy.orm import Session
 from typing import List
@@ -69,3 +70,23 @@ def update_post(id: int, post: UpdatePost, db: Session = Depends(get_db)):
     
     return  query_post.first()  # returns the updated object
     
+@app.post('/create_user', status_code=status.HTTP_201_CREATED, response_model=UserDetail)
+def create_user(new_user: CreateUser, db: Session = Depends(get_db)):
+    # user_list = db.query(models.User).all()
+    created_user = models.User(**new_user.model_dump())
+    # for user in user_list:
+    #     print(type(user))
+    #     if created_user.email in user.items('email'):
+    #         return{
+    #             'error': 'user already created,please login'
+    #         }
+    #     break        
+    db.add(created_user)
+    db.commit()
+    db.refresh(created_user)
+    return created_user
+
+@app.get('/users', status_code=status.HTTP_200_OK, response_model=List[UserDetail])
+def get_users(db: Session = Depends(get_db)):
+    user_list = db.query(models.User).all()
+    return user_list
