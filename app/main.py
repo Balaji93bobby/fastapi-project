@@ -82,15 +82,14 @@ async def test(db: Session = Depends(get_db)):
 #     return {'data': posts}
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
-def create_post(new_post: Post) -> dict:
-    cursor.execute("""INSERT INTO posts (title, content, published) VALUES (%s, %s, %s)  RETURNING * """, 
-                    (new_post.title, new_post.content, new_post.published)
-            )
-    created_post = cursor.fetchone()
-    conn.commit()
+def create_post(new_post: Post, db: Session = Depends(get_db)) :
+    created_post = models.Post(**new_post.model_dump())
+    # print(created_post)
+    db.add(created_post)
+    db.commit()
+    db.refresh(created_post)
     return {
-        'message': 'post created successfully', 
-        "all_posts": created_post
+        'data': created_post
     }
 
 @app.get('/post/{id}')
