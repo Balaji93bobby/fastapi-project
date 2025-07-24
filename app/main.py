@@ -18,14 +18,10 @@ def hello() -> dict:
         "message" : "Hello World!"
     }
 
-
-
 @app.get('/posts', response_model=List[AllPosts])
 async def test(db: Session = Depends(get_db)) :
     posts = db.query(models.Post).all()
     return posts
-
-
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED, response_model=ResponsePost)
 def create_post(new_post: CreatePost, db: Session = Depends(get_db)) :
@@ -71,22 +67,9 @@ def update_post(id: int, post: UpdatePost, db: Session = Depends(get_db)):
     
 @app.post('/create_user', status_code=status.HTTP_201_CREATED, response_model=UserDetail)
 def create_user(new_user: CreateUser, db: Session = Depends(get_db)):
-
-    #hashing the password
-
     hashed_password = utils.hash(new_user.password)
-
     new_user.password = hashed_password
-
-    # user_list = db.query(models.User).all()
-    created_user = models.User(**new_user.model_dump())
-    # for user in user_list:
-    #     print(type(user))
-    #     if created_user.email in user.items('email'):
-    #         return{
-    #             'error': 'user already created,please login'
-    #         }
-    #     break        
+    created_user = models.User(**new_user.model_dump())      
     db.add(created_user)
     db.commit()
     db.refresh(created_user)
