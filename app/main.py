@@ -1,3 +1,4 @@
+from ast import Dict
 from random import randrange
 from fastapi import Body, FastAPI, Response, status, HTTPException, Depends
 from pydantic import BaseModel
@@ -93,15 +94,16 @@ def create_post(new_post: Post, db: Session = Depends(get_db)) :
     }
 
 @app.get('/post/{id}')
-def get_post(id) -> dict:
-    cursor.execute(""" SELECT * FROM posts WHERE id = (%s) """, (id))
-    post = cursor.fetchone()
+def get_post(id: int, db: Session = Depends(get_db)):
+    post = db.query(models.Post).filter(models.Post.id == id).first()
+    print(post)
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'the post with id: {id} is not found')
+                            detail=f"the requested post for the id: {id} is not found")
     return{
-        'post_detail': f'this is the post of the {post}'
-    }
+            'post_detail': f'this is the post of the {id}',
+            'data': post
+        }
 
 @app.delete('/post/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
