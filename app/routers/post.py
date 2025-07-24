@@ -4,16 +4,19 @@ from ..database import get_db
 from sqlalchemy.orm import Session
 from typing import List
 
-router =  APIRouter()
+router =  APIRouter(
+    prefix='/post',
+    tags=['Posts']
+)
 
 
 
-@router.get('/posts', response_model=List[schemas.AllPosts])
+@router.get('/', response_model=List[schemas.AllPosts])
 async def test(db: Session = Depends(get_db)) :
     posts = db.query(models.Post).all()
     return posts
 
-@router.post('/posts', status_code=status.HTTP_201_CREATED, response_model=schemas.ResponsePost)
+@router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.ResponsePost)
 def create_post(new_post: schemas.CreatePost, db: Session = Depends(get_db)) :
     created_post = models.Post(**new_post.model_dump())
     # print(created_post)
@@ -22,7 +25,7 @@ def create_post(new_post: schemas.CreatePost, db: Session = Depends(get_db)) :
     db.refresh(created_post)
     return created_post
 
-@router.get('/post/{id}', response_model=schemas.ResponsePost)
+@router.get('/{id}', response_model=schemas.ResponsePost)
 def get_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     print(post)
@@ -31,7 +34,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
                             detail=f"the requested post for the id: {id} is not found")
     return post
 
-@router.delete('/post/{id}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session=Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id)
     if post.first() == None:
@@ -42,7 +45,7 @@ def delete_post(id: int, db: Session=Depends(get_db)):
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-@router.put('/post/{id}', status_code=status.HTTP_202_ACCEPTED, response_model=schemas.ResponsePost)
+@router.put('/{id}', status_code=status.HTTP_202_ACCEPTED, response_model=schemas.ResponsePost)
 def update_post(id: int, post: schemas.UpdatePost, db: Session = Depends(get_db)):
     query_post = db.query(models.Post).filter(models.Post.id == id)
     existing_post = query_post.first()
