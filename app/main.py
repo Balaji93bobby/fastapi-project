@@ -13,7 +13,7 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-class Post(BaseModel):
+class PostSchema(BaseModel):
     title: str
     content: str
     published: bool = True
@@ -83,7 +83,7 @@ async def test(db: Session = Depends(get_db)):
 #     return {'data': posts}
 
 @app.post('/posts', status_code=status.HTTP_201_CREATED)
-def create_post(new_post: Post, db: Session = Depends(get_db)) :
+def create_post(new_post: PostSchema, db: Session = Depends(get_db)) :
     created_post = models.Post(**new_post.model_dump())
     # print(created_post)
     db.add(created_post)
@@ -108,7 +108,6 @@ def get_post(id: int, db: Session = Depends(get_db)):
 @app.delete('/post/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session=Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id)
-
     if post.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'the post with id: {id} is not found'
@@ -118,15 +117,37 @@ def delete_post(id: int, db: Session=Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
+# @app.put('/post/{id}', status_code=status.HTTP_202_ACCEPTED)
+# def update_post(id: int, post: PostSchema, db: Session=Depends(get_db)):
+#         query_post = db.query(models.Post).filter(models.Post.id == id)
+#         # cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""", (post.title, post.content, post.published, str(id)))
+#         # updated_post = cursor.fetchone()
+#         # conn.commit()
+#         if query_post == None:
+#             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+#                             detail=f'the post with id: {id} is not found'
+#                         )
+#         updated_post = query_post.update(post.model_dump(), synchronize_session=False)
+#         db.commit()
+#         db.refresh(updated_post)
+#         return{
+#             'update_status': f"The post with id: {id} is updated",
+#             'data': updated_post
+#         }
+
+
 @app.put('/post/{id}', status_code=status.HTTP_202_ACCEPTED)
-def update_post(id: int, post: Post) -> dict:
-        cursor.execute("""UPDATE posts SET title = %s, content = %s, published = %s WHERE id = %s RETURNING *""", (post.title, post.content, post.published, str(id)))
-        updated_post = cursor.fetchone()
-        conn.commit()
-        if updated_post == None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'the post with id: {id} is not found'
-                        )
-        return{
-            'update_status': f"The post with id: {id} is updated with {updated_post}"
-        }
+def update_post(id: int, post: PostSchema, db: Session = Depends(get_db)):
+    query_post = db.query(models.Post).filter(models.Post.id == id)
+    existing_post = query_post.first()
+
+    if existing_post is None:
+        raise HTTPException(status_code=404, detail=f"Post with id {id} not found")
+
+    query_post.update(post.model_dump(), synchronize_session=False)
+    db.commit()
+    
+    return {
+        "update_status": f"The post with id: {id} is updated",
+        "data": query_post.first()  # returns the updated object
+    }
