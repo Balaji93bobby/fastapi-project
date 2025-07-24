@@ -1,13 +1,12 @@
-from ast import Dict
-from pyexpat import model
 from random import randrange
 from fastapi import Body, FastAPI, Response, status, HTTPException, Depends
-import time
-from . import models
-from .schemas import AllPosts, CreateUser, Post, CreatePost, UpdatePost, ResponsePost, User, UserDetail
+from . import models, utils
+from .schemas import AllPosts, CreateUser, CreatePost, UpdatePost, ResponsePost, User, UserDetail
 from .database import get_db, engine
 from sqlalchemy.orm import Session
 from typing import List
+
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -72,6 +71,13 @@ def update_post(id: int, post: UpdatePost, db: Session = Depends(get_db)):
     
 @app.post('/create_user', status_code=status.HTTP_201_CREATED, response_model=UserDetail)
 def create_user(new_user: CreateUser, db: Session = Depends(get_db)):
+
+    #hashing the password
+
+    hashed_password = utils.hash(new_user.password)
+
+    new_user.password = hashed_password
+
     # user_list = db.query(models.User).all()
     created_user = models.User(**new_user.model_dump())
     # for user in user_list:
