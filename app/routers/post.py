@@ -13,12 +13,12 @@ router =  APIRouter(
 
 
 @router.get('/', response_model=List[schemas.AllPosts])
-async def test(db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)) :
+async def test(db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)) :
     posts = db.query(models.Post).all()
     return posts
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.ResponsePost)
-def create_post(new_post: schemas.CreatePost, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)) :
+def create_post(new_post: schemas.CreatePost, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)) :
     created_post = models.Post(**new_post.model_dump())
     # print(created_post)
     db.add(created_post)
@@ -27,7 +27,7 @@ def create_post(new_post: schemas.CreatePost, db: Session = Depends(get_db), get
     return created_post
 
 @router.get('/{id}', response_model=schemas.ResponsePost)
-def get_post(id: int, db: Session = Depends(get_db)):
+def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     print(post)
     if not post:
@@ -36,7 +36,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
     return post
 
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(id: int, db: Session=Depends(get_db)):
+def delete_post(id: int, db: Session=Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     post = db.query(models.Post).filter(models.Post.id == id)
     if post.first() == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -47,7 +47,7 @@ def delete_post(id: int, db: Session=Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.put('/{id}', status_code=status.HTTP_202_ACCEPTED, response_model=schemas.ResponsePost)
-def update_post(id: int, post: schemas.UpdatePost, db: Session = Depends(get_db)):
+def update_post(id: int, post: schemas.UpdatePost, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     query_post = db.query(models.Post).filter(models.Post.id == id)
     existing_post = query_post.first()
 
