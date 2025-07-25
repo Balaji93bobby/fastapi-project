@@ -51,5 +51,5 @@ class Token(BaseModel):
     access_token: str
     token_type: str
 
-class TokenData:
-    id: Optional[str] = None
+class TokenData(BaseModel):
+    id: Optional[int] = None
