@@ -1,3 +1,4 @@
+from app import oauth2
 from .. import models, schemas
 from fastapi import status, HTTPException, Depends, APIRouter, FastAPI, Response
 from ..database import get_db
@@ -17,7 +18,7 @@ async def test(db: Session = Depends(get_db)) :
     return posts
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.ResponsePost)
-def create_post(new_post: schemas.CreatePost, db: Session = Depends(get_db)) :
+def create_post(new_post: schemas.CreatePost, db: Session = Depends(get_db), get_current_user: int = Depends(oauth2.get_current_user)) :
     created_post = models.Post(**new_post.model_dump())
     # print(created_post)
     db.add(created_post)

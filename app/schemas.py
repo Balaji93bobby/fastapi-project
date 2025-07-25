@@ -1,6 +1,6 @@
 from datetime import datetime
-from click import DateTime
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 class Post(BaseModel):
     title: str
@@ -46,3 +46,10 @@ class UserDetail(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData:
+    id: Optional[str] = None
