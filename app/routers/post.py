@@ -40,10 +40,15 @@ def get_post(id: int, db: Session = Depends(get_db), current_user: int = Depends
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int, db: Session=Depends(get_db), current_user: int = Depends(oauth2.get_current_user)):
     post = db.query(models.Post).filter(models.Post.id == id)
-    if post.first() == None:
+    print(current_user.id)
+    queried_post = post.first()
+    if queried_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'the post with id: {id} is not found'
                         )
+    if queried_post.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="You are not authorized to delete this post ")
     post.delete(synchronize_session=False)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -55,6 +60,9 @@ def update_post(id: int, post: schemas.UpdatePost, db: Session = Depends(get_db)
 
     if existing_post is None:
         raise HTTPException(status_code=404, detail=f"Post with id {id} not found")
+    if existing_post.user_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f'you are not authenticated to update this post')
 
     query_post.update(post.model_dump(), synchronize_session=False)
     db.commit()
