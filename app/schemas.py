@@ -15,19 +15,19 @@ class UpdatePost(Post):
     pass
 
 
-class ResponsePost(Post):
-    id: int
-    created_at: datetime
-    user_id: int
+# class ResponsePost(Post):
+#     id: int
+#     created_at: datetime
+#     user_id: int
+    
 
-    class Config:
-        orm_mode = True
+#     class Config:
+#         orm_mode = True
 
 class AllPosts(Post):
     id: int
     created_at: datetime
     user_id: int
-    pass
     class Config:
         orm_mode = True
 
@@ -43,7 +43,6 @@ class UserDetail(BaseModel):
     id: int
     email: str
     created_at: datetime
-    pass
     class Config:
         orm_mode = True
 
@@ -57,3 +56,12 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: Optional[int] = None
+
+class ResponsePost(Post):
+    id: int
+    created_at: datetime
+    user_id: int
+    user: UserDetail
+    pass
+    class Config:
+        orm_mode = True
