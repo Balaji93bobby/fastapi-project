@@ -18,11 +18,15 @@ class UpdatePost(Post):
 class ResponsePost(Post):
     id: int
     created_at: datetime
+    user_id: int
 
     class Config:
         orm_mode = True
 
 class AllPosts(Post):
+    id: int
+    created_at: datetime
+    user_id: int
     pass
     class Config:
         orm_mode = True
