@@ -19,7 +19,9 @@ async def test(db: Session = Depends(get_db), current_user: int = Depends(oauth2
 
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=schemas.ResponsePost)
 def create_post(new_post: schemas.CreatePost, db: Session = Depends(get_db), current_user: int = Depends(oauth2.get_current_user)) :
-    created_post = models.Post(**new_post.model_dump())
+    created_post = models.Post(user_id = current_user.id,**new_post.model_dump())
+    print(current_user.id)
+    print(current_user.email)
     # print(created_post)
     db.add(created_post)
     db.commit()
