@@ -1,6 +1,6 @@
 from app import oauth2
 from .. import models, schemas
-from fastapi import status, HTTPException, Depends, APIRouter, FastAPI, Response
+from fastapi import status, HTTPException, Depends, APIRouter, Response
 from ..database import get_db
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -9,7 +9,6 @@ router =  APIRouter(
     prefix='/post',
     tags=['Posts']
 )
-
 
 
 @router.get('/', response_model=List[schemas.ResponsePost])
