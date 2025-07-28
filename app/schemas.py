@@ -62,6 +62,5 @@ class ResponsePost(Post):
     created_at: datetime
     user_id: int
     user: UserDetail
-    pass
     class Config:
         orm_mode = True
