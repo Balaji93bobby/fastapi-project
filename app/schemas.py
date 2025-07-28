@@ -22,14 +22,14 @@ class UpdatePost(Post):
     
 
 #     class Config:
-#         orm_mode = True
+#         from_attributes = True
 
 class AllPosts(Post):
     id: int
     created_at: datetime
     user_id: int
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class User(BaseModel):
     email: EmailStr
@@ -44,7 +44,7 @@ class UserDetail(BaseModel):
     email: str
     created_at: datetime
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -63,4 +63,4 @@ class ResponsePost(Post):
     user_id: int
     user: UserDetail
     class Config:
-        orm_mode = True
+        from_attributes = True
