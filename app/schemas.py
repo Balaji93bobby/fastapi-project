@@ -1,6 +1,9 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
+from pydantic.types import conint
 from typing import Optional
+
+from sqlalchemy import Boolean
 
 class Post(BaseModel):
     title: str
@@ -64,3 +67,7 @@ class ResponsePost(Post):
     user: UserDetail
     class Config:
         from_attributes = True
+
+class Vote(BaseModel):
+    post_id: int
+    dir: conint(le=1)
