@@ -10,6 +10,17 @@ class Post(BaseModel):
     content: str
     published: bool = True
 
+class PostOut(Post):
+    Post: Post
+    votes: int
+
+class PostVote(PostOut):
+    Post: PostOut
+    votes: int
+
+    class Config:
+        from_attributes = True
+
 class CreatePost(Post):
     pass
 
